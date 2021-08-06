@@ -2,5 +2,5 @@
 remote: origin
 chart-dirs:
   - charts
-helm-extra-args: --timeout=500s
+helm-extra-args: --timeout=500s -n kube-system
 target-branch: master
