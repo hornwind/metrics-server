@@ -2,5 +2,8 @@
 remote: origin
 chart-dirs:
   - charts
-helm-extra-args: --timeout=500s
+# helm-extra-args: --timeout=500s
+namespace: kube-system
 target-branch: master
+release-label: "app.kubernetes.io/name"
+debug:
