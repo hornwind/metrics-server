@@ -1,0 +1,122 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "metrics-server.fullname" . }}
+  labels:
+    {{- include "metrics-server.labels" . | nindent 4 }}
+spec:
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      {{- include "metrics-server.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "metrics-server.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "metrics-server.serviceAccountName" . }}
+      priorityClassName: system-cluster-critical
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: metrics-server
+          securityContext:
+            {{- toYaml .Values.server.securityContext | nindent 12 }}
+          image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+          args:
+            - --cert-dir=/tmp
+            - --secure-port=443
+            - --kubelet-preferred-address-types={{ default "InternalIP,ExternalIP,Hostname" .Values.server.kubeletPreferredAddressTypes }}
+            - --metric-resolution={{ default "15s" .Values.server.metricResolution }}
+            {{- with .Values.server.additionalArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: https
+              scheme: HTTPS
+            periodSeconds: 10
+            failureThreshold: 3
+            initialDelaySeconds: 20
+          livenessProbe:
+            httpGet:
+              path: /livez
+              port: https
+              scheme: HTTPS
+            periodSeconds: 10
+            failureThreshold: 3
+          {{- if not .Values.nanny.enabled }}
+          resources:
+            {{- toYaml .Values.server.resources | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: tmp-dir
+              mountPath: /tmp
+
+      {{- if .Values.nanny.enabled }}
+        - name: metrics-server-nanny
+          securityContext:
+            {{- toYaml .Values.nanny.securityContext | nindent 12 }}
+          image: "{{ .Values.nanny.image.repository }}:{{ .Values.nanny.image.tag }}"
+          imagePullPolicy: {{ .Values.nanny.image.pullPolicy }}
+          env:
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MY_POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          command:
+            - /pod_nanny
+            - --container=metrics-server
+            - --deployment={{ include "metrics-server.fullname" . }}
+            - --cpu={{ default "20m" .Values.nanny.configArgs.cpu }}
+            - --extra-cpu={{ default "1m" .Values.nanny.configArgs.extraCpu }}
+            - --memory={{ default "15Mi" .Values.nanny.configArgs.memory }}
+            - --extra-memory={{ default "2Mi" .Values.nanny.configArgs.extraMemory }}
+            - --threshold={{ default "5" .Values.nanny.configArgs.threshold }}
+            - --poll-period={{ default "300000" .Values.nanny.configArgs.pollPeriod }}
+            - --estimator={{ default "exponential" .Values.nanny.configArgs.estimator }}
+            - --minClusterSize={{ default "10" .Values.nanny.configArgs.minClusterSize }}
+            - --use-metrics={{ default "true" .Values.nanny.configArgs.useMetrics }}
+            {{- with .Values.nanny.additionalArgs }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.nanny.resources | nindent 12 }}
+      {{- end }}
+      nodeSelector:
+        kubernetes.io/os: linux
+      {{- with .Values.nodeSelector }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      # mount in tmp so we can safely use from-scratch images and/or read-only containers
+      - name: tmp-dir
+        emptyDir: {}
