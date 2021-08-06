@@ -1,0 +1,22 @@
+apiVersion: v1
+entries:
+  metrics-server:
+  - apiVersion: v2
+    appVersion: v0.5.0
+    created: "2021-08-06T02:54:49.20356131Z"
+    description: 'A Helm chart for metrics-server  Rewrite from original kustomize
+      manifests https://github.com/kubernetes-sigs/metrics-server/tree/master/manifests '
+    digest: 319b7b26e6913d60e530c0bc69135f57dba82af750890155d1e389115ac13b2f
+    keywords:
+    - metrics-server
+    maintainers:
+    - email: hornwind89@gmail.com
+      name: Hornwind
+    name: metrics-server
+    sources:
+    - https://github.com/kubernetes-sigs/metrics-server
+    type: application
+    urls:
+    - https://github.com/hornwind/metrics-server/releases/download/metrics-server-0.1.1/metrics-server-0.1.1.tgz
+    version: 0.1.1
+generated: "2021-08-06T02:54:49.203566511Z"
