@@ -5,6 +5,10 @@ description: |
 
   Rewrite from original kustomize manifests https://github.com/kubernetes-sigs/metrics-server/tree/master/manifests
 
+keywords:
+  - metrics-server
+sources:
+  - https://github.com/kubernetes-sigs/metrics-server
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
@@ -25,3 +29,7 @@ version: 0.1.1
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
 appVersion: "v0.5.0"
+
+maintainers:
+  - name: Hornwind
+    email: hornwind89@gmail.com
