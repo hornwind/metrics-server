@@ -42,3 +42,6 @@ jobs:
 
       - name: Run chart-testing (install)
         run: ct install --config ct.yaml
+
+      - name: Get logs (install)
+        run: kubectl get logs -n kube-system -l app.kubernetes.io/instance=metrics-server
