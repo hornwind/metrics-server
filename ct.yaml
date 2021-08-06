@@ -2,8 +2,7 @@
 remote: origin
 chart-dirs:
   - charts
-# helm-extra-args: --timeout=500s
+helm-extra-args: --set 'server.additionalArgs[0]=--kubelet-use-node-status-port' --set 'server.additionalArgs[1]=--kubelet-insecure-tls' --debug
 namespace: kube-system
 target-branch: master
 release-label: "app.kubernetes.io/name"
-debug:
