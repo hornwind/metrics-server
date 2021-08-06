@@ -5,3 +5,4 @@ chart-dirs:
 helm-extra-args: --timeout=500s
 namespace: kube-system
 target-branch: master
+release-label: "app.kubernetes.io/name"
