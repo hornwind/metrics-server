@@ -10,6 +10,6 @@ spec:
   containers:
     - name: wget
       image: busybox
-      command: ['wget']
-      args: ['{{ include "metrics-server.fullname" . }}:443']
+      command: ['nc']
+      args: ['-z', '-v', '-w30', '{{ include "metrics-server.fullname" . }}', '443']
   restartPolicy: Never

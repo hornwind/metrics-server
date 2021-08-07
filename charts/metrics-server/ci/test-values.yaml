@@ -1,0 +1,6 @@
+server:
+  additionalArgs:
+    - "--kubelet-use-node-status-port"
+    - "--kubelet-insecure-tls"
+
+  resources: {}
