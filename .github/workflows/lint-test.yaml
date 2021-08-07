@@ -41,9 +41,4 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
 
       - name: Run chart-testing (install)
-        # env:
-        #     CT_HELM_EXTRA_ARGS:
         run: ct install --config ct.yaml
-
-      # - name: Get logs (install)
-      #   run: kubectl get logs -n kube-system -l app.kubernetes.io/instance=metrics-server
